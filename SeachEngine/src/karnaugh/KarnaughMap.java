@@ -1,3 +1,5 @@
+package karnaugh;
+
 import java.util.ArrayList;
 
 public class KarnaughMap {

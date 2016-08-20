@@ -1,3 +1,4 @@
+package karnaugh;
 
 public class Map {
 	

@@ -1,5 +1,6 @@
-import java.util.ArrayList;
+package karnaugh;
 
+import java.util.ArrayList;
 
 public class Expression {
 	//--as index 0

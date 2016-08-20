@@ -1,5 +1,7 @@
 import java.util.Scanner;
 
+import karnaugh.KarnaughMap;
+
 
 
 public class Test {
