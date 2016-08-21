@@ -17,7 +17,12 @@ public class Test {
 		
 		System.out.println("Expression: " + expression);
 		
-		System.out.println("Solved" + KarnaughMap.solve(expression));
+		KarnaughMap km = new KarnaughMap(expression);
+		km.solve();
+		
+		System.exit(0);
+		
+		//System.out.println("Solved" + KarnaughMap.solve(expression));
 		
 		System.out.println();
 		System.out.println("Press enter to proccess files");
