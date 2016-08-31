@@ -12,7 +12,6 @@ public class KarnaughMap {
 	private int col;
 	private int numEle;
 	
-	
 	public KarnaughMap(String expression){
 		this.expression = expression;
 	}
@@ -145,6 +144,36 @@ public class KarnaughMap {
 		System.out.println("Result is waiting us : " + result);
 	}
 	
+	@Override
+	public boolean equals(Object obj) {
+		// TODO Auto-generated method stub
+		KarnaughMap map = null;
+		try{
+			map = (KarnaughMap)obj;
+		}catch(ClassCastException ex){
+			return false;
+		}
+		
+		if(this.numEle != map.numEle){
+			return false;
+		}
+		
+		if(this.row != map.row || this.col != map.col){
+			return false;
+		}
+		
+		for (int i = 0; i < matrix.length; i++) {
+			for (int j = 0; j < matrix[i].length; j++) {
+				if(matrix[i][j] != map.matrix[i][j]){
+					return false;
+				}
+			}
+		}
+		
+		return true;
+		//return super.equals(obj);
+	}
+
 	private void addionToMap(Map temp) {
 		// TODO Auto-generated method stub
 		for (int i = 0; i < temp.width; i++) {
