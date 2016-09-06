@@ -18,7 +18,6 @@ public class Test {
 		System.out.println("Expression: " + expression);
 		
 		KarnaughMap km = new KarnaughMap(expression);
-		km.solve();
 		
 		System.exit(0);
 		

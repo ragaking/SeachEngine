@@ -4,6 +4,10 @@ import java.util.ArrayList;
 
 public class KarnaughMap {
 	
+	public static class KarnaughMapException extends Exception{
+		
+	}
+	
 	private String expression;
 
 	private int matrix[][];
@@ -12,22 +16,67 @@ public class KarnaughMap {
 	private int col;
 	private int numEle;
 	
-	public KarnaughMap(String expression){
-		this.expression = expression;
+	public KarnaughMap(){
+		//there is no input as expression so there is not much todo
 	}
 	
-	public void solve(){
+	public KarnaughMap(String expression){
+		this.expression = expression.toLowerCase();
+	}
+	
+	public KarnaughMap(String values[]){
+		//setting up values but there is no expression nothing to process
+		if(values.length > 4){
+			//need to throw exception
+			System.out.println("size should be acceptable");
+			assert(false);
+		}
+		
+		list = new ArrayList<String>();
+		for (int i = 0; i < values.length; i++) {
+			list.add(values[i].toLowerCase());
+		}
+	}
+	
+	public KarnaughMap(String expression,String values[]){
+		this(values);
+
+		this.expression = expression.toLowerCase();
+		
+		assign_values();
+		
+		assign_matrix();
+		
+		create_expression();
+		
+		convert_expression_to_maps();
+		
+		generate_maps();
+		
+		find_maps();
+		
+		convert_maps_to_expressions();
+	}
+	
+	
+	//--
+	private ArrayList<String> list ;
+	
+	private void splitting_expressions(){
+		//--
 		//determine there is how much different keys
 		//remove all unneccesary chars and remain just element
 		String helper = ((expression.replace("\'", "")).replace(".", " ")).replace("+", " "); 
 		String arr[] = helper.split(" ");
-		ArrayList<String> list = new ArrayList<String>();
+		list = new ArrayList<String>();
 		for (int i = 0; i < arr.length; i++) {
 			if (!list.contains(arr[i])) {
 				list.add(arr[i]);
 			}
 		}
-		//
+	}
+	
+	private void assign_values(){
 		//adding element names to an array
 		values = new String[4];
 		int index = 0;
@@ -38,7 +87,10 @@ public class KarnaughMap {
 				index = 1;
 			}
 		}
-		//--Saving number of keywords and initialize matrix
+	}
+	
+	private void assign_matrix(){
+		// --Saving number of keywords and initialize matrix
 		numEle = list.size();
 
 		row = numEle > 2 ? 4 : 2;
@@ -46,23 +98,22 @@ public class KarnaughMap {
 		//
 		matrix = new int[row][col];
 		//
-		
+	}
+	
+	//
+	private Expression[] expressions ;
+	
+	private void create_expression(){
 		//Turning sub expression to expression objects
 		String[] subEx = expression.split("\\+");
-		Expression[] expressions = new Expression[subEx.length];
-
+		expressions = new Expression[subEx.length];
 		//--
 		for (int i = 0; i < expressions.length; i++) {
 			expressions[i] = new Expression(subEx[i]);
 		}
-		//--
-		//System.out.println("Generated Expressions");
-		//for (int i = 0; i < expressions.length; i++) {
-		//	System.out.println(expressions[i]);
-		//}
-		//System.out.println("--------------------");
-		//--
-		
+	}
+	
+	private void convert_expression_to_maps(){
 		//convert expressions to maps and printing all
 		//System.out.println("Generated Maps");
 		Map[] maps = new Map[expressions.length];
@@ -74,23 +125,50 @@ public class KarnaughMap {
 			
 			//System.out.println(maps[i]);
 		}
-		//System.out.println("-------------------");
-		// --printing karnaugh map
-		//printKarnaughMap();
-		// creating captured maps
-		ArrayList<Map> finalMaps = new ArrayList<Map>();
-
+	}
+	
+	//
+	private ArrayList<Map> generatedMaps;
+	
+	private void generate_maps(){
 		// crate all possible maps for karnaugh map
-		ArrayList<Map> generatedMaps = getMaps();
+		generatedMaps = new ArrayList<Map>();
 
-		//System.out.println("Availabe maps");
-		//for (int i = 0; i < generatedMaps.size(); i++) {
-			//System.out.println(generatedMaps.get(i));
-		//}
-		//System.out.println("--------------");
-		//getting all available maps in Karnaugh...
+		int mapSize[] = {// width,heigth
+				4, 4,// 16
+				4, 2,// 8
+				2, 4,// 8
+				2, 2,// 4
+				1, 4,// 4
+				4, 1,// 4
+				1, 2,// 2
+				2, 1,// 2
+				1, 1 // 1
+		};
+
+		int idealLength = mapSize.length / 2;
+
+		for (int i = 0; i < idealLength; i++) {
+
+			Map m = new Map();
+			if(mapSize[i * 2] > KarnaughMap.this.row || mapSize[i * 2 + 1] > KarnaughMap.this.col){
+				continue;
+			}
+			m.width = mapSize[i * 2 + 1];
+			m.height = mapSize[i * 2];
+			generatedMaps.add(m);
+		}
+	}
+	
+	//
+	private ArrayList<Map> finalMaps;
+	
+	private void find_maps(){
+		// creating captured maps
+		finalMaps = new ArrayList<Map>();
+
+		// getting all available maps in Karnaugh...
 		for (int i = 0; i < generatedMaps.size(); i++) {
-
 			Map m = generatedMaps.get(i);
 
 			int length_r = row - m.height == 0 ? 1 : row;
@@ -100,48 +178,35 @@ public class KarnaughMap {
 				for (int f_c = 0; f_c < length_c; f_c++) {
 
 					Map temp = new Map(f_r, f_c, m.width, m.height);
-					
-					if(canContain(temp)){
-						
+
+					if (canContain(temp)) {
+
 						finalMaps.add(temp);
-						
 						addionToMap(temp);
 					}
 				}
 			}
 		}
-		
-		//System.out.println("Captured Maps");
-		//for (int i = 0; i < finalMaps.size(); i++) {
-			//System.out.println(finalMaps.get(i));
-		//}
-		//System.out.println("--------------");
-		
+	}
+	
+	private void convert_maps_to_expressions(){
 		//converting last maps to expression objects
 		ArrayList<Expression> lastExps = new ArrayList<Expression>();
-		
+				
 		//converting all maps to expression and adding to list
 		for (int i = 0; i < finalMaps.size(); i++) {
 			lastExps.add(finalMaps.get(i).toExpression());
 		}
 		
-		//System.out.println("Converted Expressions");
-		//for (int i = 0; i < lastExps.size(); i++) {
-			//System.out.println(lastExps.get(i));
-		//}
-		//System.out.println("-------------------");
-		
 		//returned query
 		String result = "";
-		
+
 		for (int i = 0; i < lastExps.size(); i++) {
 			result += lastExps.get(i).getExpression();
-			if(i != lastExps.size() - 1){
+			if (i != lastExps.size() - 1) {
 				result += "+";
 			}
 		}
-		
-		System.out.println("Result is waiting us : " + result);
 	}
 	
 	@Override
@@ -201,36 +266,6 @@ public class KarnaughMap {
 		return one;
 	}
 
-	private ArrayList<Map> getMaps() {
-		ArrayList<Map> map = new ArrayList<Map>();
-
-		int mapSize[] = {// width,heigth
-				4, 4,// 16
-				4, 2,// 8
-				2, 4,// 8
-				2, 2,// 4
-				1, 4,// 4
-				4, 1,// 4
-				1, 2,// 2
-				2, 1,// 2
-				1, 1 // 1
-		};
-
-		int idealLength = mapSize.length / 2;
-
-		for (int i = 0; i < idealLength; i++) {
-
-			Map m = new Map();
-			if(mapSize[i * 2] > KarnaughMap.this.row || mapSize[i * 2 + 1] > KarnaughMap.this.col){
-				continue;
-			}
-			m.width = mapSize[i * 2 + 1];
-			m.height = mapSize[i * 2];
-			map.add(m);
-		}
-
-		return map;
-	}
 	
 	private class Element{
 		//--for states
@@ -512,10 +547,139 @@ public class KarnaughMap {
 			}
 		}
 	}
+
+	/*
+	old version of solve function
 	
-	public static class KarnaughMapException extends Exception{
+	public void solve(){
+		//determine there is how much different keys
+		//remove all unneccesary chars and remain just element
+		String helper = ((expression.replace("\'", "")).replace(".", " ")).replace("+", " "); 
+		String arr[] = helper.split(" ");
+		ArrayList<String> list = new ArrayList<String>();
+		for (int i = 0; i < arr.length; i++) {
+			if (!list.contains(arr[i])) {
+				list.add(arr[i]);
+			}
+		}
+		//
+		//adding element names to an array
+		values = new String[4];
+		int index = 0;
+		for (int i = 0; i < list.size(); i++) {
+			values[index] = list.get(i);
+			index += 2;
+			if (index == 4) {
+				index = 1;
+			}
+		}
+		//--Saving number of keywords and initialize matrix
+		numEle = list.size();
+
+		row = numEle > 2 ? 4 : 2;
+		col = numEle < 4 ? 2 : 4;
+		//
+		matrix = new int[row][col];
+		//
 		
+		//Turning sub expression to expression objects
+		String[] subEx = expression.split("\\+");
+		Expression[] expressions = new Expression[subEx.length];
+		//--
+		for (int i = 0; i < expressions.length; i++) {
+			expressions[i] = new Expression(subEx[i]);
+		}
+		//--
+		//System.out.println("Generated Expressions");
+		//for (int i = 0; i < expressions.length; i++) {
+		//	System.out.println(expressions[i]);
+		//}
+		//System.out.println("--------------------");
+		//--
+		
+		//convert expressions to maps and printing all
+		//System.out.println("Generated Maps");
+		Map[] maps = new Map[expressions.length];
+		for (int i = 0; i < maps.length; i++) {
+			// convert expressions to maps
+			maps[i] = expressions[i].toMap();
+			// writing map to karnaugh map
+			maps[i].writeMap();
+			
+			//System.out.println(maps[i]);
+		}
+		//System.out.println("-------------------");
+		// --printing karnaugh map
+		//printKarnaughMap();
+		// creating captured maps
+		ArrayList<Map> finalMaps = new ArrayList<Map>();
+
+		// crate all possible maps for karnaugh map
+		ArrayList<Map> generatedMaps = getMaps();
+
+		//System.out.println("Availabe maps");
+		//for (int i = 0; i < generatedMaps.size(); i++) {
+			//System.out.println(generatedMaps.get(i));
+		//}
+		//System.out.println("--------------");
+		//getting all available maps in Karnaugh...
+		for (int i = 0; i < generatedMaps.size(); i++) {
+
+			Map m = generatedMaps.get(i);
+
+			int length_r = row - m.height == 0 ? 1 : row;
+			int length_c = col - m.width == 0 ? 1 : col;
+
+			for (int f_r = 0; f_r < length_r; f_r++) {
+				for (int f_c = 0; f_c < length_c; f_c++) {
+
+					Map temp = new Map(f_r, f_c, m.width, m.height);
+					
+					if(canContain(temp)){
+						
+						finalMaps.add(temp);
+						
+						addionToMap(temp);
+					}
+				}
+			}
+		}
+		
+		//System.out.println("Captured Maps");
+		//for (int i = 0; i < finalMaps.size(); i++) {
+			//System.out.println(finalMaps.get(i));
+		//}
+		//System.out.println("--------------");
+		
+		//converting last maps to expression objects
+		ArrayList<Expression> lastExps = new ArrayList<Expression>();
+		
+		//converting all maps to expression and adding to list
+		for (int i = 0; i < finalMaps.size(); i++) {
+			lastExps.add(finalMaps.get(i).toExpression());
+		}
+		
+		//System.out.println("Converted Expressions");
+		//for (int i = 0; i < lastExps.size(); i++) {
+			//System.out.println(lastExps.get(i));
+		//}
+		//System.out.println("-------------------");
+		
+		//returned query
+		String result = "";
+		
+		for (int i = 0; i < lastExps.size(); i++) {
+			result += lastExps.get(i).getExpression();
+			if(i != lastExps.size() - 1){
+				result += "+";
+			}
+		}
+		
+		System.out.println("Result is waiting us : " + result);
 	}
+	
+	 */
+	
 	/*
 	public static int matrix[][];
 	// --0 as A, 1 as B, 2 as C, 3 as D

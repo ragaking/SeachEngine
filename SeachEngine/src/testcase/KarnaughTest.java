@@ -13,15 +13,16 @@ public class KarnaughTest {
 	
 	@Before
 	public void setUp() throws Exception {
-		km1 = new KarnaughMap("tool'.visual.java'+tool.linux+visual.java'.linux'");
-		km2 = new KarnaughMap("visual.java'+tool.linux");
+		String values[] = new String[]{"tool","visual","java","linux"};
+		
+		km1 = new KarnaughMap("tool'.visual.java'+tool.linux+visual.java'.linux'",values);
+		km2 = new KarnaughMap("visual.java'+tool.linux",values);
 	}
 
 	@Test
 	public void test() {
 		//fail("Not yet implemented");
 		
-		km1.solve();
 		assertTrue(km1.equals(km2));
 	}
 
